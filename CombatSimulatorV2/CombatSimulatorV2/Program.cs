@@ -15,10 +15,15 @@ namespace CombatSimulatorV2
         }
     }
 
+    /// <summary>
+    /// Parent class for Player and Enemy
+    /// </summary>
     class Actor
     {
         public string Name { get; set; }
+        //and actor's "hit points", similar to "life remaining"
         public int HP { get; set; }
+        //if actor loses all hit points then they lose game
         public bool IsAlive 
         {
             get
@@ -33,8 +38,14 @@ namespace CombatSimulatorV2
                 }
             }
         }
+        //used throughout game logic
         public Random rng;
 
+        /// <summary>
+        /// Constructor, initializes Name and starting Hit Points
+        /// </summary>
+        /// <param name="name">Actor's name</param>
+        /// <param name="hp">starting hit points or "remaining life"</param>
         public Actor(string name, int hp)
         {
             this.Name = name;
@@ -42,37 +53,63 @@ namespace CombatSimulatorV2
             this.rng = new Random();
         }
 
+        /// <summary>
+        /// method used to determine results when one actor attacks another
+        /// </summary>
+        /// <param name="actor">other player being attacked</param>
         public virtual void DoAttack(Actor actor) { }
     }
 
+    /// <summary>
+    /// Child class of Actor, defines the Enemy (Seagull in this game)
+    /// </summary>
     class Enemy : Actor
     {
+        //Enemy's attack results during game
         public string EnemySuccess { get; set; }
 
+        /// <summary>
+        /// CONSTRUCTOR to declare name and starting hit points
+        /// </summary>
+        /// <param name="name">Enemy's name</param>
+        /// <param name="hp">starting hit points or "remaining life"</param>
         public Enemy(string name, int hp) : base(name, hp) { }
 
+        /// <summary>
+        /// Contains game logic when Enemy attacks a Player
+        /// </summary>
+        /// <param name="actor">other player to attack</param>
         public override void DoAttack(Actor actor)
         {
+            //if Enemy loses all hit points they don't attack (no attack results to display)
             if (this.HP <= 0)
             {
                 this.EnemySuccess = string.Empty;
             }
+            //if Enemy has remaining hit points they attack
             else
             {
                 int nachosTaken = 0;
+                //take a random number of nachos (decrease Player hit points)
                 nachosTaken = this.rng.Next(1, 4);
                 actor.HP -= nachosTaken;
+                //prevent Player hit points going below 0
                 if (actor.HP < 0)
                 {
                     actor.HP = 0;
                 }
+                //Enemy's attack results
                 this.EnemySuccess = "The Seagulls made off with " + nachosTaken + " of your chips!!";
             }
         }
     }
 
+    /// <summary>
+    /// Child class of Actor, defines the Player (Oldman in this game)
+    /// </summary>
     class Player : Actor
     {
+        ///Player attack options
         public enum AttackType
         {
             AlkaSeltzer = 1,
@@ -81,13 +118,23 @@ namespace CombatSimulatorV2
             ChuckNorris,
             Invalid
         };
-
+        //Player's attack results during game
         public string PlayerSuccess { get; set; }
 
+        /// <summary>
+        /// CONSTRUCTOR to declare name and starting hit points
+        /// </summary>
+        /// <param name="name">Player's name</param>
+        /// <param name="hp">starting hit points or "remaining life"</param>
         public Player(string name, int hp) : base(name, hp) { }
 
+        /// <summary>
+        /// Contains game logic when Player attacks an Enemy
+        /// </summary>
+        /// <param name="actor">other player to attack</param>
         public override void DoAttack(Actor actor)
         {
+            //determine attack choice based on user input
             AttackType attack = ChooseAttack();
 
             switch (attack)
@@ -96,17 +143,19 @@ namespace CombatSimulatorV2
                     //if the Alka-Seltzer works...
                     if (this.rng.Next(2) == 0)
                     {
+                        //Enemy loses 1 HP for bird that blows up
                         actor.HP--;
                         //rng to see how many extra birds fly away
                         int extraBirdsFlyAway = this.rng.Next(2, 5);
+                        //subtract from Enemy's HP's
                         actor.HP -= extraBirdsFlyAway;
-                        //to prevent score from going below zero
+                        //prevent Enemy HP's from going below zero
                         if (actor.HP < 0)
                         {
                             actor.HP = 0;
                         }
-                        //string created that prints in RoundInfo() function
-                        this.PlayerSuccess = "THE ALKA-SELTZER WORKED!!  " + extraBirdsFlyAway + " other birds also flew away!!";
+                        //Player's attack results
+                        this.PlayerSuccess = "THE ALKA-SELTZER WORKED!!  " + extraBirdsFlyAway + " extra birds flew away!!";
                         //show animation of play results
                         Console.Clear();
                         Graphics.BirdEatsAlkaSeltzer();
@@ -114,7 +163,8 @@ namespace CombatSimulatorV2
                     }
                     else
                     {
-                        this.PlayerSuccess = "Sorry, that bird is too smart for your shenanigans.";
+                        //Player attack results if Alka-Seltzer fails
+                        this.PlayerSuccess = "Sorry, that bird is too smart for your shenanigans!";
                         //animation of play results
                         Console.Clear();
                         Graphics.BirdAvoidsAlkaSeltzer();
@@ -123,14 +173,24 @@ namespace CombatSimulatorV2
                     break;
 
                 case AttackType.KickSand:
-                    //effectiveness of sand kick
+                    //determine effectiveness of sand kick
                     int sandSuccess = this.rng.Next(1, 4);
+                    //subtract from Enemy's HP's
                     actor.HP -= sandSuccess;
+                    //prevent Enemy HP's from going below zero
                     if (actor.HP < 0)
                     {
                         actor.HP = 0;
                     }
-                    this.PlayerSuccess = "Nice sand kick!!  " + sandSuccess + " birds flew off.";
+                    //Player attack results
+                    if (sandSuccess == 1)
+                    {
+                        this.PlayerSuccess = "Nice sand kick!!  1 bird flew off!";
+                    }
+                    else
+                    {
+                        this.PlayerSuccess = "Nice sand kick!!  " + sandSuccess + " birds flew off!";
+                    }
                     //graphic of play result
                     Console.Clear();
                     Graphics.KickSand();
@@ -140,13 +200,17 @@ namespace CombatSimulatorV2
                 case AttackType.AddChips:
                     //determine number of chips added
                     int chipsAdded = this.rng.Next(2, 5);
+                    //add to Player's HP's
                     this.HP += chipsAdded;
+                    //Player's "healing" results
                     this.PlayerSuccess = "You added " + chipsAdded + " chips back to your nachos.";
                     //no animation or graphics for adding chips
                     break;
 
                 case AttackType.ChuckNorris:
+                    //if used, Enemy loses all HP's and Player will win
                     actor.HP = 0;
+                    //Player's attack results
                     this.PlayerSuccess = "OH YEAH!!!  You wiped them all out!!  Time to chill with some nachos!!";
                     //Chuck Norris Power animation
                     Console.Clear();
@@ -155,6 +219,8 @@ namespace CombatSimulatorV2
                     break;
 
                 case AttackType.Invalid:
+                    //no Player attack
+                    //Player's "results"
                     this.PlayerSuccess = "STOP GOOFING AROUND!!";
                     break;
 
@@ -162,25 +228,29 @@ namespace CombatSimulatorV2
                     break;
             }
         }
-
+        /// <summary>
+        /// get Player's attack choice from user input
+        /// </summary>
+        /// <returns>chosen attack</returns>
         public AttackType ChooseAttack()
         {
             Console.Write("Enter your combat choice: ");
             string oldManCombatChoice = Console.ReadLine();
+            //if valid then determine AttackType
             if (this.InputValidator(oldManCombatChoice))
             {
                 return (AttackType)Convert.ToInt32(oldManCombatChoice);
             }
+            //if invalid then Player loses turn
             else
             {
                 return AttackType.Invalid;
             }
         }
-
         /// <summary>
-        /// Input needs to be a 1, 2, or 3.  Can be a 4 only after "Chuck Norris Power" is enabled
+        /// user input validator used to determine AttackType
         /// </summary>
-        /// <param name="userInput_">1, 2, 3, or sometimes a 4</param>
+        /// <param name="userInput_">a number</param>
         /// <returns>true if input is valid</returns>
         private bool InputValidator(string userInput_)
         {
@@ -189,8 +259,6 @@ namespace CombatSimulatorV2
             {
                 Console.WriteLine();
                 Animations.OldTimeyTextPrinter("ENTER A VALID INPUT...", 10);
-                //PlayerSuccess = "STOP GOOFING AROUND!!";
-                //BirdSuccess = "YOUR NACHOS ARE IN DANGER!!";
                 Thread.Sleep(Animations.PauseDuration);
                 return false;
             }
@@ -210,8 +278,6 @@ namespace CombatSimulatorV2
                 {
                     Console.WriteLine();
                     Animations.OldTimeyTextPrinter("ENTER A VALID INPUT...", 10);
-                    //PlayerSuccess = "STOP GOOFING AROUND!!";
-                    //BirdSuccess = "YOUR NACHOS ARE IN DANGER!!";
                     Thread.Sleep(Animations.PauseDuration);
                     return false;
                 }
@@ -221,63 +287,85 @@ namespace CombatSimulatorV2
             {
                 Console.WriteLine();
                 Animations.OldTimeyTextPrinter("ENTER A VALID INPUT...", 10);
-                //PlayerSuccess = "STOP GOOFING AROUND!!";
-                //BirdSuccess = "YOUR NACHOS ARE IN DANGER!!";
                 Thread.Sleep(Animations.PauseDuration);
                 return false;
             }
         }
     }
 
+    /// <summary>
+    /// Class that contains overall game flow and logic 
+    /// </summary>
     class Game
     {
         public Player Oldman { get; set; }
         public Enemy Seagull { get; set; }
-        public int RoundCounter { get; set; }
+        //used when enabling ChuckNorrisPower and initial RoundInfo results
+        private int RoundCounter { get; set; }
+        //enables extra Player attack option (static b/c needed in InputValidator in Player Class)
         public static bool ChuckNorrisPower { get; set; }
+        //used to enable ChuckNorrisPower
         private Random rng;
 
+        /// <summary>
+        /// CONSTRUCTOR to define Player, Enemy, and rng.  Begin game intro animations
+        /// </summary>
         public Game()
         {
-            //**add a Console.ReadLine to take user input "name"??
             this.Oldman = new Player("Old Man", 20);
             this.Seagull = new Enemy("Seagulls", 30);
-
-            Console.SetWindowSize(116, 50);
             this.rng = new Random();
 
-            //Animations.IntroAnimation();
-            //Animations.TitleSequence();
-            //Animations.Instructions();
+            //set console size so graphics and animations fit properly
+            Console.SetWindowSize(116, 50);
+
+            Animations.IntroAnimation();
+            Animations.TitleSequence();
+            Animations.Instructions();
         }
 
+        /// <summary>
+        /// main game method
+        /// </summary>
         public void PlayGame()
         {
+            //begin new game with counter at 0 and ChuckNorrisPower off
             this.RoundCounter = 0;
             Game.ChuckNorrisPower = false;
+            //if both Player and Enemy alive (have remaining HP's) then continue game
             while (this.Oldman.IsAlive && this.Seagull.IsAlive)
             {
-                Game.ChuckNorrisPower = AllowCNPower();
-                DisplayCombatInfo();
+                //determine state of ChuckNorrisPower attack option for Player
+                Game.ChuckNorrisPower = this.AllowCNPower();
+                //display current game stats
+                this.DisplayCombatInfo();
+                //Player attacks first, then Enemy
                 this.Oldman.DoAttack(this.Seagull);
                 this.Seagull.DoAttack(this.Oldman);
+                //increase RoundCounter each round of game
                 this.RoundCounter++;
             }
+            //when either player runs out of HP's check to see who won
             if (this.Oldman.IsAlive)
             {
-                OldManWins();
+                this.OldManWins();
             }
             else
             {
-                SeagullsWin();
+                this.SeagullsWin();
             }
         }
 
+        /// <summary>
+        /// after round 4 there is a 30% chance ChuckNorrisPower attack option will be enabled
+        /// once enabled it stays enabled
+        /// </summary>
+        /// <returns>true if enabled</returns>
         private bool AllowCNPower()
         {
             if (Game.ChuckNorrisPower == false)
             {
-                if (RoundCounter > 4)
+                if (this.RoundCounter > 4)
                 {
                     if (3 >= this.rng.Next(1, 11))
                     {
@@ -286,14 +374,14 @@ namespace CombatSimulatorV2
                 } return false;
             } return true;
         }
-
+        /// <summary>
+        /// display current round stats and repeat basic game instructions
+        /// </summary>
         private void DisplayCombatInfo()
         {
-            //**write to console current game info
             this.RoundInfo();
             this.BasicInstructions();
         }
-
         /// <summary>
         /// Displays information from previous round of game play
         /// </summary>
@@ -305,7 +393,7 @@ namespace CombatSimulatorV2
             //after first round 
             if (this.RoundCounter > 0)
             {
-                //Print results of Player and Bird success results from last round of play
+                //Print results of Player and Bird success results from previous round of play
                 Animations.OldTimeyTextPrinter(this.Oldman.PlayerSuccess, 10);
                 Thread.Sleep(Animations.PauseDuration / 2);
                 Console.WriteLine();
@@ -313,7 +401,7 @@ namespace CombatSimulatorV2
                 Animations.OldTimeyTextPrinter(this.Seagull.EnemySuccess, 10);
                 Thread.Sleep(Animations.PauseDuration);
             }
-            //when game first starts, before there are any play results yet
+            //when game first starts, before there are any play results
             else
             {
                 Thread.Sleep(Animations.PauseDuration / 2);
@@ -334,7 +422,6 @@ namespace CombatSimulatorV2
                 Console.Write("*");
             }
             Console.WriteLine();
-            //Console.WriteLine();
             Console.Write(("Number of remaining NACHOS: " + this.Oldman.HP).PadRight(33));
             for (int i = 0; i < this.Oldman.HP; i++)
             {
@@ -342,9 +429,7 @@ namespace CombatSimulatorV2
             }
             Console.WriteLine();
             Console.WriteLine();
-
         }
-
         /// <summary>
         /// Basic instructions of game printed every round
         /// </summary>
@@ -365,19 +450,20 @@ namespace CombatSimulatorV2
                 Console.WriteLine();
                 Console.WriteLine();
             }
-            //Console.Write("Enter your combat choice: ");
         }
-
+        /// <summary>
+        /// game logic if Player wins
+        /// </summary>
         private void OldManWins()
         {
             //show final round info
             Console.Clear();
             Graphics.SeagullShowdownText_2();
-            RoundInfo();
+            this.RoundInfo();
             Thread.Sleep(Animations.PauseDuration * 3);
             Console.Clear();
             Console.CursorVisible = false;
-            //animation if you won
+            //animation if Player wins
             for (int i = 0; i < 3; i++)
             {
                 Graphics.YouWon();
@@ -394,13 +480,15 @@ namespace CombatSimulatorV2
             //ask user to play again
             this.PlayAgain();
         }
-
+        /// <summary>
+        /// game logic if Enemy wins
+        /// </summary>
         private void SeagullsWin()
         {
             //show final round info
             Console.Clear();
             Graphics.SeagullShowdownText_2();
-            RoundInfo();
+            this.RoundInfo();
             Thread.Sleep(Animations.PauseDuration * 3);
             Console.Clear();
             Console.CursorVisible = false;
@@ -421,7 +509,6 @@ namespace CombatSimulatorV2
             //ask user if they want to play again
             this.PlayAgain();
         }
-
         /// <summary>
         /// ask user to play again, run game again if yes, exit game if no
         /// </summary>
@@ -431,17 +518,22 @@ namespace CombatSimulatorV2
             Console.Write("Do you want to play again, Y or N: ");
             if (Console.ReadLine().ToUpper() == "Y")
             {
+                //reset starting HP's and start PlayGame function over again
                 this.Oldman.HP = 20;
                 this.Seagull.HP = 30;
                 this.PlayGame();
             }
+            //if "no" then exit game
         }
-
     }
 
 
+    /// <summary>
+    /// Primary animations used at beginning of game
+    /// </summary>
     public static class Animations
     {
+        //standard length of pause used throughout game
         public static int PauseDuration = 1000;
 
         /// <summary>
@@ -508,10 +600,10 @@ namespace CombatSimulatorV2
         {
             Console.Clear();
             Graphics.SeagullShowdownText_1();
-            Thread.Sleep(PauseDuration / 2);
+            Thread.Sleep(PauseDuration);
             Console.Clear();
             Graphics.SeagullShowdownText_2();
-            Thread.Sleep(PauseDuration / 2);
+            Thread.Sleep(PauseDuration);
             Graphics.ManandSeagull_2();
             Thread.Sleep(PauseDuration);
 
@@ -579,9 +671,11 @@ namespace CombatSimulatorV2
             Console.WriteLine("Press any key to continue: ");
             Console.ReadKey();
         }
-
     }
 
+    /// <summary>
+    /// Graphics and short animations used throughout game
+    /// </summary>
     public static class Graphics
     {
         public static void IntroAniGraphics(int picNumber_)
