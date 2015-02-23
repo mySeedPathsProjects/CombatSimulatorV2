@@ -47,14 +47,27 @@ namespace CombatSimulatorV2
 
     class Enemy : Actor
     {
-        public string  EnemySuccess { get; set; }
+        public string EnemySuccess { get; set; }
 
         public Enemy(string name, int hp) : base(name, hp) { }
 
         public override void DoAttack(Actor actor)
         {
-            //**Attack Logic
-            //**Combat text
+            if (this.HP <= 0)
+            {
+                this.EnemySuccess = string.Empty;
+            }
+            else
+            {
+                int nachosTaken = 0;
+                nachosTaken = this.rng.Next(1, 4);
+                actor.HP -= nachosTaken;
+                if (actor.HP < 0)
+                {
+                    actor.HP = 0;
+                }
+                this.EnemySuccess = "The Seagulls made off with " + nachosTaken + " of your chips!!";
+            }
         }
     }
 
@@ -76,7 +89,78 @@ namespace CombatSimulatorV2
         public override void DoAttack(Actor actor)
         {
             AttackType attack = ChooseAttack();
-            //Game Action
+
+            switch (attack)
+            {
+                case AttackType.AlkaSeltzer:
+                    //if the Alka-Seltzer works...
+                    if (this.rng.Next(2) == 0)
+                    {
+                        actor.HP--;
+                        //rng to see how many extra birds fly away
+                        int extraBirdsFlyAway = this.rng.Next(2, 5);
+                        actor.HP -= extraBirdsFlyAway;
+                        //to prevent score from going below zero
+                        if (actor.HP < 0)
+                        {
+                            actor.HP = 0;
+                        }
+                        //string created that prints in RoundInfo() function
+                        this.PlayerSuccess = "THE ALKA-SELTZER WORKED!!  " + extraBirdsFlyAway + " other birds also flew away!!";
+                        //show animation of play results
+                        Console.Clear();
+                        Graphics.BirdEatsAlkaSeltzer();
+                        Thread.Sleep(Animations.PauseDuration);
+                    }
+                    else
+                    {
+                        this.PlayerSuccess = "Sorry, that bird is too smart for your shenanigans.";
+                        //animation of play results
+                        Console.Clear();
+                        Graphics.BirdAvoidsAlkaSeltzer();
+                        Thread.Sleep(Animations.PauseDuration * 2);
+                    }
+                    break;
+
+                case AttackType.KickSand:
+                    //effectiveness of sand kick
+                    int sandSuccess = this.rng.Next(1, 4);
+                    actor.HP -= sandSuccess;
+                    if (actor.HP < 0)
+                    {
+                        actor.HP = 0;
+                    }
+                    this.PlayerSuccess = "Nice sand kick!!  " + sandSuccess + " birds flew off.";
+                    //graphic of play result
+                    Console.Clear();
+                    Graphics.KickSand();
+                    Thread.Sleep(1500);
+                    break;
+
+                case AttackType.AddChips:
+                    //determine number of chips added
+                    int chipsAdded = this.rng.Next(2, 5);
+                    this.HP += chipsAdded;
+                    this.PlayerSuccess = "You added " + chipsAdded + " chips back to your nachos.";
+                    //no animation or graphics for adding chips
+                    break;
+
+                case AttackType.ChuckNorris:
+                    actor.HP = 0;
+                    this.PlayerSuccess = "OH YEAH!!!  You wiped them all out!!  Time to chill with some nachos!!";
+                    //Chuck Norris Power animation
+                    Console.Clear();
+                    Graphics.ChuckNorrisFace();
+                    Thread.Sleep(Animations.PauseDuration * 2);
+                    break;
+
+                case AttackType.Invalid:
+                    this.PlayerSuccess = "STOP GOOFING AROUND!!";
+                    break;
+
+                default:
+                    break;
+            }
         }
 
         public AttackType ChooseAttack()
@@ -105,7 +189,7 @@ namespace CombatSimulatorV2
             {
                 Console.WriteLine();
                 Animations.OldTimeyTextPrinter("ENTER A VALID INPUT...", 10);
-                PlayerSuccess = "STOP GOOFING AROUND!!";
+                //PlayerSuccess = "STOP GOOFING AROUND!!";
                 //BirdSuccess = "YOUR NACHOS ARE IN DANGER!!";
                 Thread.Sleep(Animations.PauseDuration);
                 return false;
@@ -126,7 +210,7 @@ namespace CombatSimulatorV2
                 {
                     Console.WriteLine();
                     Animations.OldTimeyTextPrinter("ENTER A VALID INPUT...", 10);
-                    PlayerSuccess = "STOP GOOFING AROUND!!";
+                    //PlayerSuccess = "STOP GOOFING AROUND!!";
                     //BirdSuccess = "YOUR NACHOS ARE IN DANGER!!";
                     Thread.Sleep(Animations.PauseDuration);
                     return false;
@@ -137,7 +221,7 @@ namespace CombatSimulatorV2
             {
                 Console.WriteLine();
                 Animations.OldTimeyTextPrinter("ENTER A VALID INPUT...", 10);
-                PlayerSuccess = "STOP GOOFING AROUND!!";
+                //PlayerSuccess = "STOP GOOFING AROUND!!";
                 //BirdSuccess = "YOUR NACHOS ARE IN DANGER!!";
                 Thread.Sleep(Animations.PauseDuration);
                 return false;
@@ -161,12 +245,10 @@ namespace CombatSimulatorV2
 
             Console.SetWindowSize(116, 50);
             this.rng = new Random();
-            //this.RoundCounter = 0;
-            //Game.ChuckNorrisPower = false;
 
-            Animations.IntroAnimation();
-            Animations.TitleSequence();
-            Animations.Instructions();
+            //Animations.IntroAnimation();
+            //Animations.TitleSequence();
+            //Animations.Instructions();
         }
 
         public void PlayGame()
