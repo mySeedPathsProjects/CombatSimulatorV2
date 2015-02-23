@@ -156,6 +156,7 @@ namespace CombatSimulatorV2
                         }
                         //Player's attack results
                         this.PlayerSuccess = "THE ALKA-SELTZER WORKED!!  " + extraBirdsFlyAway + " extra birds flew away!!";
+                        Game.FaceGraphicChoice = 3;
                         //show animation of play results
                         Console.Clear();
                         Graphics.BirdEatsAlkaSeltzer();
@@ -165,6 +166,7 @@ namespace CombatSimulatorV2
                     {
                         //Player attack results if Alka-Seltzer fails
                         this.PlayerSuccess = "Sorry, that bird is too smart for your shenanigans!";
+                        Game.FaceGraphicChoice = 1;
                         //animation of play results
                         Console.Clear();
                         Graphics.BirdAvoidsAlkaSeltzer();
@@ -191,6 +193,7 @@ namespace CombatSimulatorV2
                     {
                         this.PlayerSuccess = "Nice sand kick!!  " + sandSuccess + " birds flew off!";
                     }
+                    Game.FaceGraphicChoice = 3;
                     //graphic of play result
                     Console.Clear();
                     Graphics.KickSand();
@@ -204,6 +207,7 @@ namespace CombatSimulatorV2
                     this.HP += chipsAdded;
                     //Player's "healing" results
                     this.PlayerSuccess = "You added " + chipsAdded + " chips back to your nachos.";
+                    Game.FaceGraphicChoice = 1;
                     //no animation or graphics for adding chips
                     break;
 
@@ -212,6 +216,7 @@ namespace CombatSimulatorV2
                     actor.HP = 0;
                     //Player's attack results
                     this.PlayerSuccess = "OH YEAH!!!  You wiped them all out!!  Time to chill with some nachos!!";
+                    Game.FaceGraphicChoice = 3;
                     //Chuck Norris Power animation
                     Console.Clear();
                     Graphics.ChuckNorrisFace();
@@ -222,6 +227,7 @@ namespace CombatSimulatorV2
                     //no Player attack
                     //Player's "results"
                     this.PlayerSuccess = "STOP GOOFING AROUND!!";
+                    Game.FaceGraphicChoice = 1;
                     break;
 
                 default:
@@ -304,6 +310,8 @@ namespace CombatSimulatorV2
         private int RoundCounter { get; set; }
         //enables extra Player attack option (static b/c needed in InputValidator in Player Class)
         public static bool ChuckNorrisPower { get; set; }
+        //used to control face graphics
+        public static int FaceGraphicChoice { get; set; }
         //used to enable ChuckNorrisPower
         private Random rng;
 
@@ -317,11 +325,11 @@ namespace CombatSimulatorV2
             this.rng = new Random();
 
             //set console size so graphics and animations fit properly
-            Console.SetWindowSize(116, 50);
+            Console.SetWindowSize(116, 60);
 
-            Animations.IntroAnimation();
+            //Animations.IntroAnimation();
             Animations.TitleSequence();
-            Animations.Instructions();
+            //Animations.Instructions();
         }
 
         /// <summary>
@@ -332,6 +340,7 @@ namespace CombatSimulatorV2
             //begin new game with counter at 0 and ChuckNorrisPower off
             this.RoundCounter = 0;
             Game.ChuckNorrisPower = false;
+            Game.FaceGraphicChoice = 1;
             //if both Player and Enemy alive (have remaining HP's) then continue game
             while (this.Oldman.IsAlive && this.Seagull.IsAlive)
             {
@@ -382,6 +391,25 @@ namespace CombatSimulatorV2
             this.RoundInfo();
             this.BasicInstructions();
         }
+
+        private void ChooseFaceGraphic(int choice)
+        {
+            switch (choice)
+            {
+                case 1:
+                    Graphics.ManandSeagull_MadHappy();
+                    break;
+                case 2:
+                    Graphics.ManandSeagull_HappyHappy();
+                    break;
+                case 3:
+                    Graphics.ManandSeagull_HappyMad();
+                    break;
+                default:
+                    break;
+            }
+        }
+
         /// <summary>
         /// Displays information from previous round of game play
         /// </summary>
@@ -389,6 +417,7 @@ namespace CombatSimulatorV2
         {
             Console.Clear();
             Graphics.SeagullShowdownText_2();
+            this.ChooseFaceGraphic(Game.FaceGraphicChoice);
 
             //after first round 
             if (this.RoundCounter > 0)
@@ -604,7 +633,7 @@ namespace CombatSimulatorV2
             Console.Clear();
             Graphics.SeagullShowdownText_2();
             Thread.Sleep(PauseDuration);
-            Graphics.ManandSeagull_2();
+            Graphics.ManandSeagull_MadHappy();
             Thread.Sleep(PauseDuration);
 
             //make title of game "blink" 3 times
@@ -612,15 +641,15 @@ namespace CombatSimulatorV2
             {
                 Console.Clear();
                 Graphics.SeagullShowdownText_3();
-                Graphics.ManandSeagull_2();
+                Graphics.ManandSeagull_MadHappy();
                 Thread.Sleep(PauseDuration / 4);
                 Console.Clear();
                 Graphics.SeagullShowdownText_2();
-                Graphics.ManandSeagull_2();
+                Graphics.ManandSeagull_MadHappy();
                 Thread.Sleep(PauseDuration / 4);
             }
 
-            Thread.Sleep(PauseDuration * 2);
+            Thread.Sleep(PauseDuration);
 
         }
 
@@ -908,7 +937,7 @@ namespace CombatSimulatorV2
   \___jl_____jl__j__jl___,_j \__,_jl_____jl_____j      \___jl__j__j \___/   \_/\_/  l_____j \___/   \_/\_/  l__j__j
                                                                                                                    
 ");
-            Console.WriteLine();
+            //Console.WriteLine();
         }
 
         public static void SeagullShowdownText_3()
@@ -925,10 +954,10 @@ namespace CombatSimulatorV2
   \___jl_____jl__j__jl___,_j \__,_jl_____jl_____j      \___jl__j__j \___/   \_/\_/  l_____j \___/   \_/\_/  l__j__j
                                                                                                                    
 ");
-            Console.WriteLine();
+            //Console.WriteLine();
         }
 
-        public static void ManandSeagull_2()
+        public static void ManandSeagull_MadHappy()
         {
             Console.BackgroundColor = ConsoleColor.Black;
             Console.ForegroundColor = ConsoleColor.White;
@@ -950,6 +979,66 @@ namespace CombatSimulatorV2
             (_,  \  /   `'./   |                                                      :              /
               \  / | .-`'--'`. |                                                       \            /
                | ( \   ,  /_,  |                                                        \          .'
+               \    `   ``     /                                                         :         :
+                '-.__     // .'                                                           :        \
+                     `'`.__.'                                                             :         \
+
+");
+
+        }
+
+        public static void ManandSeagull_HappyHappy()
+        {
+            Console.BackgroundColor = ConsoleColor.Black;
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.WriteLine(@"
+                                                   
+                .-'--.                                                                  _______        
+              .'      '.                                                            _.-'       ''...._
+             /     _    `-.                                                       .'        .--.    '.`
+            /              \,  ,                                                 : .--.    :    :     '-.
+           ;           '    \####,                                              : :    :   :    :       :`
+           |,       .- -'    ;####                                              : :  @ :___:  @ : __     '`.
+          ,##         `     ,|###'                                       _____..:---''''   `----''  `.   .''
+        #,####,     ###  ##  |^;#                                     -''                      ___j  :   :
+        `######  `##   ,|  ' |`)|                                    /                   __..''      :    `.
+         `#####       o\`\o_.| ;\                                   /---------_______--''        __..'   /``
+          (-`\#,    .-'` |`  : `;                                   \ _______________________--''       /
+          `\ ;\#,         \   \-'                                                    --''               \
+            )( \#    C,_   \   ;                                                     :                :`.:
+            (_,  \      `'./   |                                                      :              /
+              \  /   \-`'--'`/ |                                                       \            /
+               | ( \  \\, _//  |                                                        \          .'
+               \    `   ``     /                                                         :         :
+                '-.__     // .'                                                           :        \
+                     `'`.__.'                                                             :         \
+
+");
+
+        }
+
+        public static void ManandSeagull_HappyMad()
+        {
+            Console.BackgroundColor = ConsoleColor.Black;
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.WriteLine(@"
+                                                   
+                .-'--.                                                                  _______        
+              .'      '.                                                            _.-'       ''...._
+             /     _    `-.                                                       .' \        /     '.`
+            /              \,  ,                                                 : .--\      /--.     '-.
+           ;           '    \####,                                              : :____\   /____:       :`
+           |,       .- -'    ;####                                              : :--@-:___:--@-:        '`.
+          ,##         `     ,|###'                                       _____..:---''''   `----''__     .''
+        #,####,     ###  ##  |^;#                                     -''                           \    :
+        `######  `##   ,|  ' |`)|                                    /        _________              :    `.
+         `#####       o\`\o_.| ;\                                   /---------         -----___      :   /``
+          (-`\#,    .-'` |`  : `;                                   \ ____------------_____    \     /  /
+          `\ ;\#,         \   \-'                                                      ''        ---    \
+            )( \#    C,_   \   ;                                                       :              :`.:
+            (_,  \      `'./   |                                                       :             /
+              \  /   \-`'--'`/ |                                                       \            /
+               | ( \  \\, _//  |                                                        \          .'
                \    `   ``     /                                                         :         :
                 '-.__     // .'                                                           :        \
                      `'`.__.'                                                             :         \
