@@ -24,22 +24,9 @@ namespace CombatSimulatorV2
         //and actor's "hit points", similar to "life remaining"
         public int HP { get; set; }
         //if actor loses all hit points then they lose game
-        public bool IsAlive 
-        {
-            get
-            {
-                if (HP > 0)
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-        }
+        public bool IsAlive { get { return this.HP > 0; } }      
         //used throughout game logic
-        public Random rng;
+        public Random RNG;
 
         /// <summary>
         /// Constructor, initializes Name and starting Hit Points
@@ -50,7 +37,7 @@ namespace CombatSimulatorV2
         {
             this.Name = name;
             this.HP = hp;
-            this.rng = new Random();
+            this.RNG = new Random();
         }
 
         /// <summary>
@@ -61,7 +48,7 @@ namespace CombatSimulatorV2
     }
 
     /// <summary>
-    /// Child class of Actor, defines the Enemy (Seagull in this game)
+    /// Child class of Actor, defines the Enemy (Seagull in this game) (Computer Controlled)
     /// </summary>
     class Enemy : Actor
     {
@@ -76,7 +63,7 @@ namespace CombatSimulatorV2
         public Enemy(string name, int hp) : base(name, hp) { }
 
         /// <summary>
-        /// Contains game logic when Enemy attacks a Player
+        /// Contains game logic when Enemy attacks another player in game (Player or Enemy)
         /// </summary>
         /// <param name="actor">other player to attack</param>
         public override void DoAttack(Actor actor)
@@ -89,9 +76,8 @@ namespace CombatSimulatorV2
             //if Enemy has remaining hit points they attack
             else
             {
-                int nachosTaken = 0;
                 //take a random number of nachos (decrease Player hit points)
-                nachosTaken = this.rng.Next(1, 4);
+                int nachosTaken = this.RNG.Next(1, 4);
                 actor.HP -= nachosTaken;
                 //prevent Player hit points going below 0
                 if (actor.HP < 0)
@@ -141,12 +127,12 @@ namespace CombatSimulatorV2
             {
                 case AttackType.AlkaSeltzer:
                     //if the Alka-Seltzer works...
-                    if (this.rng.Next(2) == 0)
+                    if (this.RNG.Next(2) == 0)
                     {
                         //Enemy loses 1 HP for bird that blows up
                         actor.HP--;
                         //rng to see how many extra birds fly away
-                        int extraBirdsFlyAway = this.rng.Next(2, 5);
+                        int extraBirdsFlyAway = this.RNG.Next(2, 5);
                         //subtract from Enemy's HP's
                         actor.HP -= extraBirdsFlyAway;
                         //prevent Enemy HP's from going below zero
@@ -176,7 +162,7 @@ namespace CombatSimulatorV2
 
                 case AttackType.KickSand:
                     //determine effectiveness of sand kick
-                    int sandSuccess = this.rng.Next(1, 4);
+                    int sandSuccess = this.RNG.Next(1, 4);
                     //subtract from Enemy's HP's
                     actor.HP -= sandSuccess;
                     //prevent Enemy HP's from going below zero
@@ -202,7 +188,7 @@ namespace CombatSimulatorV2
 
                 case AttackType.AddChips:
                     //determine number of chips added
-                    int chipsAdded = this.rng.Next(2, 5);
+                    int chipsAdded = this.RNG.Next(2, 5);
                     //add to Player's HP's
                     this.HP += chipsAdded;
                     //Player's "healing" results
@@ -327,9 +313,9 @@ namespace CombatSimulatorV2
             //set console size so graphics and animations fit properly
             Console.SetWindowSize(116, 60);
 
-            //Animations.IntroAnimation();
+            Animations.IntroAnimation();
             Animations.TitleSequence();
-            //Animations.Instructions();
+            Animations.Instructions();
         }
 
         /// <summary>
